@@ -1,0 +1,62 @@
+import csv
+
+produtos = {}
+vendas = []
+
+def CadastrarProdutos():
+    while True: 
+        codigo = input("Digite o código do produto: ")
+        nome = input("Digite o nome do produto: ")
+        quantidade = int(input("Digite a quantidade do produto: "))
+        preco = float(input("Digite o preco do produto: "))
+        
+        produtos[codigo] = {
+            "codigo": codigo,
+            "nome" : nome,
+            "quantidade": quantidade,
+            "preco" : preco
+        }
+        quantidadeVendida = int(input("Digite a quantidade vendida desse produto: "))
+        RegistrarVenda(codigo,quantidadeVendida)
+        verificar = input("Deseja cadastrar outro produto? (s/n): ")
+        if verificar != 's':
+            break
+
+def RegistrarVenda(codigo, quantidadeVendida):
+    if codigo in produtos:
+       produto = produtos[codigo]
+       if produto["quantidade"] >= quantidadeVendida:
+           produto["quantidade"] -= quantidadeVendida
+           vendas.append({
+               "codigo" : codigo,
+               "nome": produto["nome"],
+               "quantidadeVendida": quantidadeVendida,
+               "valorTotal" : quantidadeVendida * produto["preco"]
+           })
+           return True
+    else:
+        print("Esse código de produto não está cadastrado")
+    return False
+        
+def GerarRelatorioDeVendas(arquivo_csv):
+    with open(arquivo_csv, mode='w', newline='') as arquivo:
+        fieldnames = ["codigo", "nome", "quantidadeVendida", "valorTotal"]
+        writer = csv.DictWriter(arquivo, fieldnames=fieldnames, delimiter=';')
+        writer.writeheader()
+        for venda in vendas:
+            writer.writerow({
+                "codigo": venda["codigo"],
+                "nome": venda["nome"],
+                "quantidadeVendida": venda["quantidadeVendida"],
+                "valorTotal": venda["valorTotal"]
+            })
+
+def GerarRelatorioDoEstoque(arquivo_txt):
+    with open(arquivo_txt, 'w') as arquivo:
+        for codigo, produto in produtos.items():
+            arquivo.write(f'Código: {codigo}, Nome: {produto["nome"]}, Quantidade: {produto["quantidade"]}\n')
+
+CadastrarProdutos()
+GerarRelatorioDeVendas('vendas.csv')
+GerarRelatorioDoEstoque('estoque.txt')
+
